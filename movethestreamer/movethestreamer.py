@@ -1,8 +1,10 @@
-from redbot.core.commands import Cog, Context, admin_or_permissions, hybrid_command, commands
+import json
+from logging import getLogger
+
+from discord import Member, ActivityType
 from redbot.core import Config
 from redbot.core.bot import Red
-from discord import Member, ActivityType, utils
-from logging import getLogger
+from redbot.core.commands import Cog, Context, commands
 
 log = getLogger("red.nbdy-cogs.movethestreamer")
 
@@ -34,8 +36,8 @@ class MoveTheStreamer(Cog):
             await ctx.send("Can't use this command with DM's")
             return
 
-        member = self.bot.get_user(user_id)
-        if not member:
+        user = self.bot.get_user(user_id)
+        if not user:
             await ctx.send(f"Could not find user with id '{user_id}'.")
             return
 
@@ -45,12 +47,12 @@ class MoveTheStreamer(Cog):
             return
 
         channel_map = await self.config.channel_map()
-        if member.id not in channel_map.keys():
-            channel_map[member.id] = channel.id
+        if user.id not in channel_map.keys():
+            channel_map[user.id] = channel.id
             await self.config.channel_map.set(channel_map)
-            await ctx.send(f"Moving '{member.name}' to '{channel.name}' when they start streaming.")
+            await ctx.send(f"Moving '{user.name}' to '{channel.name}' when they start streaming.")
         else:
-            await ctx.send(f"User '{member.name}' already mapped to channel '{channel.name}'.")
+            await ctx.send(f"User '{user.name}' already mapped to channel '{channel.name}'.")
 
     @movethestreamer.command(name="del")
     async def _movethestreamer_del(self, ctx: Context, user_id: int) -> None:
@@ -58,20 +60,20 @@ class MoveTheStreamer(Cog):
             await ctx.send("Can't use this command with DM's")
             return
 
-        member = self.bot.get_user(user_id)
-        if not member:
+        user = self.bot.get_user(user_id)
+        if not user:
             await ctx.send(f"Could not find user with id '{user_id}'.")
             return
 
         channel_map = await self.config.channel_map()
-        if member.id in channel_map.keys():
-            channel_id = channel_map[member.id]
+        if user.id in channel_map.keys():
+            channel_id = channel_map[user.id]
             channel = self.bot.get_channel(channel_id)
-            del channel_map[member.id]
+            del channel_map[user.id]
             await self.config.channel_map.set(channel_map)
-            await ctx.send(f"'{member.name}' will not be moved to '{channel.name}' when they start streaming.")
+            await ctx.send(f"'{user.name}' will not be moved to '{channel.name}' when they start streaming.")
         else:
-            await ctx.send(f"'{member.name}' is not mapped to any channel.")
+            await ctx.send(f"'{user.name}' is not mapped to any channel.")
 
     @movethestreamer.command(name="clear")
     async def _movethestreamer_clear(self, ctx: Context) -> None:
@@ -89,6 +91,11 @@ class MoveTheStreamer(Cog):
             channel_name = channel.name if channel else v
             text += f"{user_name} -> {channel_name}\n"
         await ctx.send(text)
+
+    @movethestreamer.command(name="dump")
+    async def _movethestreamer_dump(self, ctx: Context) -> None:
+        channel_map = await self.config.channel_map()
+        await ctx.send(json.dumps(channel_map))
 
     @Cog.listener()
     async def on_presence_update(self, before: Member, after: Member):
