@@ -73,6 +73,11 @@ class MoveTheStreamer(Cog):
         else:
             await ctx.send(f"'{member.name}' is not mapped to any channel.")
 
+    @movethestreamer.command(name="clear")
+    async def _movethestreamer_clear(self, ctx: Context) -> None:
+        await self.config.channel_map.set(dict())
+        await ctx.send("Removed all user to channel mappings.")
+
     @movethestreamer.command(name="list")
     async def _movethestreamer_list(self, ctx: Context) -> None:
         channel_map = await self.config.channel_map()
