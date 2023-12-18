@@ -1,0 +1,7 @@
+{
+  "author": ["nbdy"],
+  "name": "movethestreamer",
+  "short": "move users that start streaming",
+  "description": "move users that start streaming",
+  "requirements": []
+}
