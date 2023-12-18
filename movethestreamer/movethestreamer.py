@@ -81,7 +81,7 @@ class MoveTheStreamer(Cog):
         if str(user.id) in channel_map.keys():
             channel_id = channel_map[str(user.id)]
             channel = self.bot.get_channel(channel_id)
-            del channel_map[int(user.id)]
+            del channel_map[str(user.id)]
             await self.config.channel_map.set(channel_map)
             await ctx.send(f"'{user.name}' will not be moved to '{channel.name}' when they start streaming.")
         else:
