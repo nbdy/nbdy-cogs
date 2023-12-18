@@ -1,1 +1,3 @@
-from loguru import logger as log
+from logging import getLogger
+
+log = getLogger("red.nbdy-cogs.movethestreamer")
