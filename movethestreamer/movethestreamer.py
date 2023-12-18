@@ -17,8 +17,7 @@ class MoveTheStreamer(Cog):
             force_registration=True
         )
         self.config.register_global(
-            channel_map={},
-            seperator=":",
+            channel_map=dict(),
             reason="Automatically moved to your streaming channel since you started streaming."
         )
 
@@ -54,7 +53,7 @@ class MoveTheStreamer(Cog):
 
     @movethestreamer.command(name="del")
     async def _movethestreamer_del(self, ctx: Context, name: str) -> None:
-        member = utils.get(ctx.guild.members, name=name)
+        member = await utils.get(ctx.guild.members, name=name)
         if not member:
             await ctx.send(f"Could not find user '{name}'.")
             return
@@ -71,7 +70,7 @@ class MoveTheStreamer(Cog):
     async def _movethestreamer_list(self, ctx: Context) -> None:
         channel_map = self.get_channel_map()
         text = "Users who will be automatically moved to another channel as soon as they start streaming:\n"
-        for k, v in channel_map.items():
+        for k, v in channel_map:
             text += f"{k} -> {v}\n"
         await ctx.send(text)
 
