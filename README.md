@@ -1,8 +1,8 @@
 # cogs
 
-| name            | description                                                       | status |
-|-----------------|-------------------------------------------------------------------|--------|
-| movethestreamer | moves a streamer to an assigned channel when they start streaming | tbd    |
+| name            | description                                                       | status  |
+|-----------------|-------------------------------------------------------------------|---------|
+| movethestreamer | moves a streamer to an assigned channel when they start streaming | testing |
 
 # installation
 ```
