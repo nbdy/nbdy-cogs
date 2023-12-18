@@ -2,8 +2,9 @@ from redbot.core.commands import Cog, Context, admin_or_permissions, hybrid_comm
 from redbot.core import Config
 from redbot.core.bot import Red
 from discord import Member, ActivityType, utils
+from logging import getLogger
 
-from movethestreamer import log
+log = getLogger("red.nbdy-cogs.movethestreamer")
 
 
 class MoveTheStreamer(Cog):
@@ -20,6 +21,9 @@ class MoveTheStreamer(Cog):
             seperator=":",
             reason="Automatically moved to your streaming channel since you started streaming."
         )
+
+    async def cog_load(self) -> None:
+        await super().cog_load()
 
     def get_channel_map(self) -> dict[str, str]:
         return self.config.channel_map()

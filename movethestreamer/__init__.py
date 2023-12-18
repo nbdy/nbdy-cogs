@@ -1,3 +1,6 @@
-from logging import getLogger
+from redbot.core.bot import Red
+from .movethestreamer import MoveTheStreamer
 
-log = getLogger("red.nbdy-cogs.movethestreamer")
+
+async def setup(bot: Red):
+    await bot.add_cog(MoveTheStreamer(bot))
