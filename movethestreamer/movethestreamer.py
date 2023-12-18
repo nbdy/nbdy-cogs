@@ -48,7 +48,7 @@ class MoveTheStreamer(Cog):
 
         channel_map = await self.config.channel_map()
         if user.id not in channel_map.keys():
-            channel_map[user.id] = channel.id
+            channel_map[int(user.id)] = int(channel.id)
             await self.config.channel_map.set(channel_map)
             await ctx.send(f"Moving '{user.name}' to '{channel.name}' when they start streaming.")
         else:
