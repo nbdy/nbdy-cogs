@@ -29,7 +29,7 @@ class MoveTheStreamer(Cog):
         pass
 
     @movethestreamer.command(name="add")
-    async def _movethestreamer_add(self, ctx: Context, name: str, channel: str) -> None:
+    async def _movethestreamer_add(self, ctx: Context, name: str, channel_id: str) -> None:
         if not ctx.guild:
             await ctx.send("Can't use this command with DM's")
             return
@@ -39,7 +39,7 @@ class MoveTheStreamer(Cog):
             await ctx.send(f"Could not find user '{name}'.")
             return
 
-        channel = utils.get(self.bot.get_all_channels(), name=channel)
+        channel = self.bot.get_channel(int(channel_id))
         if not channel:
             await ctx.send(f"Could not find channel '{channel}'.")
             return
