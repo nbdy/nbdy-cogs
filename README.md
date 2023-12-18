@@ -13,5 +13,8 @@
 [p]repo add nbdy-repo https://github.com/nbdy/red-discordbot-cogs
 
 # install a cog can be any of the listed in the features section
-[p] cog install nbdy-repo {cog}
+[p]cog install nbdy-repo {cog}
+
+# and finally load the cog
+[p]cog load {cog}
 ```
