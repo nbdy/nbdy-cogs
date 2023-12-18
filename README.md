@@ -10,10 +10,10 @@
 [p]load downloader
 
 # add the repo
-[p]repo add nbdy-repo https://github.com/nbdy/red-discordbot-cogs
+[p]repo add nbdy-cogs https://github.com/nbdy/nbdy-cogs
 
 # install a cog can be any of the listed in the features section
-[p]cog install nbdy-repo {cog}
+[p]cog install nbdy-cogs {cog}
 
 # and finally load the cog
 [p]cog load {cog}
