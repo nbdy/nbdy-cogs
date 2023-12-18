@@ -30,12 +30,16 @@ class MoveTheStreamer(Cog):
 
     @movethestreamer.command(name="add")
     async def _movethestreamer_add(self, ctx: Context, name: str, channel: str) -> None:
+        if not ctx.guild:
+            await ctx.send("Can't use this command with DM's")
+            return
+
         member = ctx.guild.get_member_named(name)
         if not member:
             await ctx.send(f"Could not find user '{name}'.")
             return
 
-        channel = utils.get(ctx.guild.channels, name=channel)
+        channel = utils.get(self.bot.get_all_channels(), name=channel)
         if not channel:
             await ctx.send(f"Could not find channel '{channel}'.")
             return
@@ -50,7 +54,11 @@ class MoveTheStreamer(Cog):
 
     @movethestreamer.command(name="del")
     async def _movethestreamer_del(self, ctx: Context, name: str) -> None:
-        member = await utils.get(ctx.guild.members, name=name)
+        if not ctx.guild:
+            await ctx.send("Can't use this command with DM's")
+            return
+
+        member = ctx.guild.get_member_named(name)
         if not member:
             await ctx.send(f"Could not find user '{name}'.")
             return
