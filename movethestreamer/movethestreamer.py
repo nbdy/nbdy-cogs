@@ -85,7 +85,9 @@ class MoveTheStreamer(Cog):
         for k, v in channel_map.items():
             user = self.bot.get_user(k)
             channel = self.bot.get_channel(v)
-            text += f"{user.name} -> {channel.name}\n"
+            user_name = user.name if user else k
+            channel_name = channel.name if channel else v
+            text += f"{user_name} -> {channel_name}\n"
         await ctx.send(text)
 
     @Cog.listener()
