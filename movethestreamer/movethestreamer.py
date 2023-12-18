@@ -82,7 +82,7 @@ class MoveTheStreamer(Cog):
     async def _movethestreamer_list(self, ctx: Context) -> None:
         channel_map = await self.config.channel_map()
         text = "Users who will be automatically moved to another channel as soon as they start streaming:\n"
-        for k, v in channel_map:
+        for k, v in channel_map.items():
             user = self.bot.get_user(k)
             channel = self.bot.get_channel(v)
             text += f"{user.name} -> {channel.name}\n"
