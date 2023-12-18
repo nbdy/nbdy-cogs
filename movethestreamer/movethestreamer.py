@@ -31,45 +31,57 @@ class MoveTheStreamer(Cog):
         pass
 
     @movethestreamer.command(name="add")
-    async def _movethestreamer_add(self, ctx: Context, user_id: int, channel_id: int) -> None:
+    async def _movethestreamer_add(self, ctx: Context, user_id: str, channel_id: str) -> None:
         if not ctx.guild:
             await ctx.send("Can't use this command with DM's")
             return
 
-        user = self.bot.get_user(user_id)
+        if not user_id.isnumeric():
+            await ctx.send("User-ID must be numeric!")
+            return
+
+        if not channel_id.isnumeric():
+            await ctx.send("Channel-ID must be numeric!")
+            return
+
+        user = self.bot.get_user(int(user_id))
         if not user:
             await ctx.send(f"Could not find user with id '{user_id}'.")
             return
 
-        channel = self.bot.get_channel(channel_id)
+        channel = self.bot.get_channel(int(channel_id))
         if not channel:
             await ctx.send(f"Could not find channel with id '{channel}'.")
             return
 
         channel_map = await self.config.channel_map()
         if user.id not in channel_map.keys():
-            channel_map[int(user.id)] = int(channel.id)
+            channel_map[user.id] = channel.id
             await self.config.channel_map.set(channel_map)
             await ctx.send(f"Moving '{user.name}' to '{channel.name}' when they start streaming.")
         else:
             await ctx.send(f"User '{user.name}' already mapped to channel '{channel.name}'.")
 
     @movethestreamer.command(name="del")
-    async def _movethestreamer_del(self, ctx: Context, user_id: int) -> None:
+    async def _movethestreamer_del(self, ctx: Context, user_id: str) -> None:
         if not ctx.guild:
             await ctx.send("Can't use this command with DM's")
             return
 
-        user = self.bot.get_user(user_id)
+        if not user_id.isnumeric():
+            await ctx.send("User-ID must be numeric!")
+            return
+
+        user = self.bot.get_user(int(user_id))
         if not user:
             await ctx.send(f"Could not find user with id '{user_id}'.")
             return
 
         channel_map = await self.config.channel_map()
         if user.id in channel_map.keys():
-            channel_id = channel_map[user.id]
+            channel_id = channel_map[str(user.id)]
             channel = self.bot.get_channel(channel_id)
-            del channel_map[user.id]
+            del channel_map[int(user.id)]
             await self.config.channel_map.set(channel_map)
             await ctx.send(f"'{user.name}' will not be moved to '{channel.name}' when they start streaming.")
         else:
@@ -85,8 +97,8 @@ class MoveTheStreamer(Cog):
         channel_map = await self.config.channel_map()
         text = "Users who will be automatically moved to another channel as soon as they start streaming:\n"
         for k, v in channel_map.items():
-            user = self.bot.get_user(k)
-            channel = self.bot.get_channel(v)
+            user = self.bot.get_user(int(k))
+            channel = self.bot.get_channel(int(v))
             user_name = user.name if user else k
             channel_name = channel.name if channel else v
             text += f"{user_name} -> {channel_name}\n"
