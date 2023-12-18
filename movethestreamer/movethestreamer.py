@@ -9,7 +9,8 @@ log = getLogger("red.nbdy-cogs.movethestreamer")
 
 class MoveTheStreamer(Cog):
     def __init__(self, bot: Red):
-        super().__init__(bot=bot)
+        super().__init__(self)
+        self.bot = bot
         self.config = Config.get_conf(
             self,
             42069,
