@@ -24,9 +24,6 @@ class MoveTheStreamer(Cog):
     async def cog_load(self) -> None:
         await super().cog_load()
 
-    def get_channel_map(self) -> dict[str, str]:
-        return self.config.channel_map()
-
     @commands.group()
     async def movethestreamer(self, ctx: Context) -> None:
         pass
@@ -43,7 +40,7 @@ class MoveTheStreamer(Cog):
             await ctx.send(f"Could not find channel '{channel}'.")
             return
 
-        channel_map = self.get_channel_map()
+        channel_map = await self.config.channel_map()
         if member.name not in channel_map.keys():
             channel_map[member.name] = channel.name
             self.config.channel_map.set(channel_map)
@@ -58,7 +55,7 @@ class MoveTheStreamer(Cog):
             await ctx.send(f"Could not find user '{name}'.")
             return
 
-        channel_map = self.get_channel_map()
+        channel_map = await self.config.channel_map()
         if member.name in channel_map.keys():
             channel = channel_map[member.name]
             del channel_map[member.name]
@@ -68,7 +65,7 @@ class MoveTheStreamer(Cog):
 
     @movethestreamer.command(name="list")
     async def _movethestreamer_list(self, ctx: Context) -> None:
-        channel_map = self.get_channel_map()
+        channel_map = await self.config.channel_map()
         text = "Users who will be automatically moved to another channel as soon as they start streaming:\n"
         for k, v in channel_map:
             text += f"{k} -> {v}\n"
@@ -80,7 +77,7 @@ class MoveTheStreamer(Cog):
         activity_str = "streaming" if after.activity == ActivityType.streaming else "stopped streaming"
         if activity_change:
             log.debug(f"User {before.name} {activity_str}")
-            channel_map = self.get_channel_map()
+            channel_map = await self.config.channel_map()
             ctx = await self.bot.get_context(after)
             if before.name in channel_map.keys():
                 channel = await utils.get(ctx.guild.channels, name=channel_map[before.name])
