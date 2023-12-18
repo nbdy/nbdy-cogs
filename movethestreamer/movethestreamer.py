@@ -69,7 +69,7 @@ class MoveTheStreamer(Cog):
         if activity_change:
             log.debug(f"User {before.name} {activity_str}")
             channel_map = self.get_channel_map()
-            ctx = self.bot.get_context(after)
+            ctx = await self.bot.get_context(after)
             if before.name in channel_map.keys():
-                channel = utils.get(ctx.guild.channels, name=channel_map[before.name])
+                channel = await utils.get(ctx.guild.channels, name=channel_map[before.name])
                 await before.move_to(channel, reason=self.config.reason())
