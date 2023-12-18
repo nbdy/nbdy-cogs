@@ -1,4 +1,4 @@
-from redbot.core.commands import Cog, Context, admin_or_permissions, hybrid_command
+from redbot.core.commands import Cog, Context, admin_or_permissions, hybrid_command, commands
 from redbot.core import Config
 from redbot.core.bot import Red
 from discord import Member, ActivityType, utils
@@ -28,39 +28,52 @@ class MoveTheStreamer(Cog):
     def get_channel_map(self) -> dict[str, str]:
         return self.config.channel_map()
 
-    def get_user_channel(self, text: str) -> tuple[str, str]:
-        user, channel = text.split(self.config.seperator())
-        return user, channel
+    @commands.group()
+    async def movethestreamer(self, ctx: Context) -> None:
+        pass
 
-    @hybrid_command()
-    @admin_or_permissions()
-    async def add_twitch_channel(self, ctx: Context, *, text: str = None):
-        if text:
-            channel_map = self.get_channel_map()
-            user, channel = self.get_user_channel(text)
-            if user not in channel_map.keys():
-                channel_map[user] = channel
-                self.config.channel_map.set(channel_map)
-                await ctx.send(f"Moving '{user}' to '{channel_map[user]}' when they start streaming.")
-            else:
-                await ctx.send(f"User already mapped to channel '{channel_map[user]}'.")
-        else:
-            await ctx.send("Please provide a user:channel combination.")
+    @movethestreamer.command(name="add")
+    async def _movethestreamer_add(self, ctx: Context, name: str, channel: str) -> None:
+        member = utils.get(ctx.guild.members, name=name)
+        if not member:
+            await ctx.send(f"Could not find user '{name}'.")
+            return
 
-    @hybrid_command()
-    @admin_or_permissions()
-    async def del_twitch_channel(self, ctx: Context, *, text: str = None):
-        if text:
-            channel_map = self.get_channel_map()
-            user = text
-            if user in channel_map.keys():
-                del channel_map[user]
-                self.config.channel_map.set(channel_map)
-                await ctx.send(f"'{user}' will not be moved to '{channel_map[user]}' when they start streaming.")
-            else:
-                await ctx.send(f"'{user}' is not mapped to any channel yet.")
+        channel = utils.get(ctx.guild.channels, name=channel)
+        if not channel:
+            await ctx.send(f"Could not find channel '{channel}'.")
+            return
+
+        channel_map = self.get_channel_map()
+        if member.name not in channel_map.keys():
+            channel_map[member.name] = channel.name
+            self.config.channel_map.set(channel_map)
+            await ctx.send(f"Moving '{member.name}' to '{channel.name}' when they start streaming.")
         else:
-            await ctx.send("Please provide a user.")
+            await ctx.send(f"User '{member.name}' already mapped to channel '{channel.name}'.")
+
+    @movethestreamer.command(name="del")
+    async def _movethestreamer_del(self, ctx: Context, name: str) -> None:
+        member = utils.get(ctx.guild.members, name=name)
+        if not member:
+            await ctx.send(f"Could not find user '{name}'.")
+            return
+
+        channel_map = self.get_channel_map()
+        if member.name in channel_map.keys():
+            channel = channel_map[member.name]
+            del channel_map[member.name]
+            await ctx.send(f"User '{member.name}' will not be moved to channel '{channel}' when they start streaming.")
+        else:
+            await ctx.send(f"User '{member.name}' is not mapped to any channel.")
+
+    @movethestreamer.command(name="list")
+    async def _movethestreamer_list(self, ctx: Context) -> None:
+        channel_map = self.get_channel_map()
+        text = "Users who will be automatically moved to another channel as soon as they start streaming:\n"
+        for k, v in channel_map.items():
+            text += f"{k} -> {v}\n"
+        await ctx.send(text)
 
     @Cog.listener()
     async def on_presence_update(self, before: Member, after: Member):
@@ -72,4 +85,6 @@ class MoveTheStreamer(Cog):
             ctx = await self.bot.get_context(after)
             if before.name in channel_map.keys():
                 channel = await utils.get(ctx.guild.channels, name=channel_map[before.name])
-                await before.move_to(channel, reason=self.config.reason())
+                reason = self.config.reason()
+                await before.move_to(channel, reason=reason)
+                await before.send(reason)
