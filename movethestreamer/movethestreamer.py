@@ -29,54 +29,58 @@ class MoveTheStreamer(Cog):
         pass
 
     @movethestreamer.command(name="add")
-    async def _movethestreamer_add(self, ctx: Context, name: str, channel_id: str) -> None:
+    async def _movethestreamer_add(self, ctx: Context, user_id: int, channel_id: int) -> None:
         if not ctx.guild:
             await ctx.send("Can't use this command with DM's")
             return
 
-        member = ctx.guild.get_member_named(name)
+        member = self.bot.get_user(user_id)
         if not member:
-            await ctx.send(f"Could not find user '{name}'.")
+            await ctx.send(f"Could not find user with id '{user_id}'.")
             return
 
-        channel = self.bot.get_channel(int(channel_id))
+        channel = self.bot.get_channel(channel_id)
         if not channel:
-            await ctx.send(f"Could not find channel '{channel}'.")
+            await ctx.send(f"Could not find channel with id '{channel}'.")
             return
 
         channel_map = await self.config.channel_map()
-        if member.name not in channel_map.keys():
-            channel_map[member.name] = channel.name
-            self.config.channel_map.set(channel_map)
+        if member.id not in channel_map.keys():
+            channel_map[member.id] = channel.id
+            await self.config.channel_map.set(channel_map)
             await ctx.send(f"Moving '{member.name}' to '{channel.name}' when they start streaming.")
         else:
             await ctx.send(f"User '{member.name}' already mapped to channel '{channel.name}'.")
 
     @movethestreamer.command(name="del")
-    async def _movethestreamer_del(self, ctx: Context, name: str) -> None:
+    async def _movethestreamer_del(self, ctx: Context, user_id: int) -> None:
         if not ctx.guild:
             await ctx.send("Can't use this command with DM's")
             return
 
-        member = ctx.guild.get_member_named(name)
+        member = self.bot.get_user(user_id)
         if not member:
-            await ctx.send(f"Could not find user '{name}'.")
+            await ctx.send(f"Could not find user with id '{user_id}'.")
             return
 
         channel_map = await self.config.channel_map()
-        if member.name in channel_map.keys():
-            channel = channel_map[member.name]
-            del channel_map[member.name]
-            await ctx.send(f"User '{member.name}' will not be moved to channel '{channel}' when they start streaming.")
+        if member.id in channel_map.keys():
+            channel_id = channel_map[member.id]
+            channel = self.bot.get_channel(channel_id)
+            del channel_map[member.id]
+            await self.config.channel_map.set(channel_map)
+            await ctx.send(f"'{member.name}' will not be moved to '{channel.name}' when they start streaming.")
         else:
-            await ctx.send(f"User '{member.name}' is not mapped to any channel.")
+            await ctx.send(f"'{member.name}' is not mapped to any channel.")
 
     @movethestreamer.command(name="list")
     async def _movethestreamer_list(self, ctx: Context) -> None:
         channel_map = await self.config.channel_map()
         text = "Users who will be automatically moved to another channel as soon as they start streaming:\n"
         for k, v in channel_map:
-            text += f"{k} -> {v}\n"
+            user = self.bot.get_user(k)
+            channel = self.bot.get_channel(v)
+            text += f"{user.name} -> {channel.name}\n"
         await ctx.send(text)
 
     @Cog.listener()
@@ -86,9 +90,8 @@ class MoveTheStreamer(Cog):
         if activity_change:
             log.debug(f"User {before.name} {activity_str}")
             channel_map = await self.config.channel_map()
-            ctx = await self.bot.get_context(after)
-            if before.name in channel_map.keys():
-                channel = await utils.get(ctx.guild.channels, name=channel_map[before.name])
+            if before.id in channel_map.keys():
+                channel = self.bot.get_channel(channel_map[before.id])
                 reason = self.config.reason()
                 await before.move_to(channel, reason=reason)
                 await before.send(reason)
