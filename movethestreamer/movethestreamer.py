@@ -78,7 +78,7 @@ class MoveTheStreamer(Cog):
             return
 
         channel_map = await self.config.channel_map()
-        if user.id in channel_map.keys():
+        if str(user.id) in channel_map.keys():
             channel_id = channel_map[str(user.id)]
             channel = self.bot.get_channel(channel_id)
             del channel_map[int(user.id)]
