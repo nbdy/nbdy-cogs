@@ -30,7 +30,7 @@ class MoveTheStreamer(Cog):
 
     @movethestreamer.command(name="add")
     async def _movethestreamer_add(self, ctx: Context, name: str, channel: str) -> None:
-        member = utils.get(ctx.guild.members, name=name)
+        member = ctx.guild.get_member_named(name)
         if not member:
             await ctx.send(f"Could not find user '{name}'.")
             return
